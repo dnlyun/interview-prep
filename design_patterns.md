@@ -1,20 +1,20 @@
 # SOLID Principles
 
-### Single Responsibility
+## Single Responsibility
 **"A class should have only one reason to change"**\
 That is, each module should do one thing
 
-### Open-Closed
+## Open-Closed
 **"Modules should be open for extension, but closed for modification"**
 
-### Liskov Substitution
+## Liskov Substitution
 **"Derived or child classes must be substitutable for their base or parent classes"**
 
-### Interface Segregation
+## Interface Segregation
 **"Clients should not be forced to depend on interfaces it doesn't use"**\
 That is, instead of one large interface, have multiple smaller interfaces
 
-### Dependency Inversion
+## Dependency Inversion
 **"High-level modules should not depend on low-level modules. Both should depend on abstractions"**\
 Additionally, abstractions should not depend on details. Details should depend on abstractions
 

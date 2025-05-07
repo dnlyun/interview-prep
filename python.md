@@ -1,25 +1,28 @@
-# Basics
-Compiled: source code is translated to machine code or bytecode before execution, resulting in an executable\
-Interpreted: source code is translated line by line at runtime
-> Property of the implementation, not the language itself\
-> Eg. Python is compiled to bytecode -> PVM can execute bytecode with interpreter or using Just-In-Time compilation
+Python
+======
 
-Strongly vs weakly: how strict types are enforced (eg. int + str allowed?)
+# Terminology
 
-Static vs dynamic: when types are checked (compile time or runtime)
+`Compiled`: source code is translated to machine code or bytecode before execution, resulting in an executable\
+`Interpreted`: source code is translated line by line at runtime
+- Property of the implementation, not the language itself (eg. Python is compiled to bytecode -> PVM can execute bytecode with interpreter or using Just-In-Time compilation)
 
-Pass by value: function receives a copy of the variable value\
-Pass by reference: function receives a reference to the variable
+`Strongly` vs `weakly`: how strict types are enforced (eg. int + str allowed?)
 
-## Built-in Types
+`Static` vs `dynamic`: when types are checked (compile time or runtime)
 
-### Truth Value Testing
+`Pass by value`: function receives a copy of the variable value\
+`Pass by reference`: function receives a reference to the variable
+
+# Built-in Types
+
+## Truth Value Testing
 An object is evaluated to `True` unless the class has a `__bool__()` method that returns `False` or `__len__()` that returns 0. Objects considered `False`:
 - Constants with value `None` or `False`
 - `0`, `0.0`, `0j`
 - `''`, `()`, `[]`, `{}`, `set()`, `range(0)`
 
-### Bit Manipulation
+## Bit Manipulation
 | Operation | Symbol |
 | - | - |
 | Bitwise AND | a & b |
@@ -29,7 +32,7 @@ An object is evaluated to `True` unless the class has a `__bool__()` method that
 | Bitwise left shift | a << b |
 | Bitwise right shift | a >> b |
 
-### Float, Complex
+## Float, Complex
 Constructor
 - `float()` accepts `'inf'` and `'nan'` (optional prefix: +/-)
 - `complex(real, imag)`
@@ -39,12 +42,12 @@ Scientific notation: `3e4`, `1.4e-2`
 Complex: `1 + 2j`
 - `z.real` = 1.0, `z.imag` = 2.0
 
-### Binary
+## Binary
 Conversion
 - `bin(x)`: convert int to binary string prefixed with '0b'
 - `int(x, 2)`: convert binary string to int
 
-### Strings
+## Strings
 `chr(97)` = 'a'\
 `ord('a')` = 97
 
@@ -66,7 +69,7 @@ Check if string is alphanumeric
 
 `str.split()`, `' '.join(list)`
 
-### F-string
+## F-string
 `f'{a = }, {b = }, {c = }'`\
 `f'{a} + {b} = {c}'` equivalent to `f'{a + b = }'`
 
@@ -78,7 +81,7 @@ Check if string is alphanumeric
 | Scientic notation | `{num:e}` | 1.0e+1 |
 | 5 digits | `{num:05}` | 00010 |
 
-### Print & I/O
+## Print & I/O
 `print(*obj, sep='', end='\n')`
 
 | Mode | Symbol | If file doesn't exist | If file exists |
@@ -98,10 +101,10 @@ with open('file.ext', 'r') as f:
     data = f.read()
 ```
 
-## Iterator
+# Iterator
 Iterator vs Iterable: Objects like strings and lists are iterable, but not iterators
 
-### Turn iterable into iterator
+## Turn iterable into iterator
 `__iter__(obj)` returns iterator object\
 `__iter__(obj, sentinel)`
 - `obj` must be callable (check out [Objects](#objects))
@@ -112,7 +115,7 @@ s = iter(s)
 print(next(s))
 ```
 
-### Generator
+## Generator
 ```python
 def generator():
     yield 1
@@ -120,7 +123,8 @@ def generator():
     yield 3
 g = generator()
 print(next(g))
-
+```
+```python
 def stateful_generator():
     num = yield # get input from outside
     while True:
@@ -131,9 +135,9 @@ sg.send(10)
 sg.send(12)
 ```
 
-## Functions
+# Functions
 
-### Type Hinting
+## Type Hinting
 ```python
 num: int = 0
 
@@ -141,7 +145,7 @@ def type_hinting(x: int, y: int | None = None) -> list[int]:
     ...
 ```
 
-### Packing
+## Packing
 ```python
 a, *b = 1, 2, 3
 print(a, b)
@@ -155,7 +159,7 @@ def add(*nums):
 print(add(1, 1, 1, 1, 1))
 ```
 
-### Lambda functions
+## Lambda functions
 - Anonymous: don't require name
 - Short-term use
 ```python
@@ -166,14 +170,14 @@ y = lambda a, b: a + b
 print(y(3, 4))
 ```
 
-### Conditional statements
+## Conditional statements
 `map`
 
 `filter`
 
 `reduce`
 
-### Variable Scope
+## Variable Scope
 A function can read a global variable but can't modify it
 ```python
 x = 1
@@ -207,7 +211,7 @@ def outer():
         x = 9
 ```
 
-### Main function
+## Main function
 ```python
 def main():
     ...
@@ -216,11 +220,11 @@ if __name__ == "__main__":
     main()
 ```
 
-### Functions are Objects
+## Functions are Objects
 Everything in Python is an object, including functions\
 A callable is an object that can be called using `()`, ie. functions, objects, classes. `()` invokes `__call__()`
 
-#### Examples
+**Examples**
 ```python
 def shout(s):
     print(s.upper())
@@ -258,7 +262,7 @@ adder_2 = create_adder(2)
 ```
 </details>
 
-### Decorator
+## Decorator
 A function that takes another function as an argument and extends/modifies its behavior
 ```python
 def outer(func):
@@ -273,7 +277,7 @@ def foo():
     ...
 ```
 
-## Class
+# Class
 Class variable: shared across all instances\
 Instance variable: unique to each instance
 
@@ -295,11 +299,11 @@ class Person:
 
     def __str__(self):
         return f'{self.name}-{self.age}'
-    
+
     # operator overloading
     def __add__(self, other):
         return Person(self.name + other.name, 1)
-    
+
     @staticmethod
     def foo():
         ...
@@ -309,7 +313,7 @@ class Person:
         return cls('John', 7)
 ```
 
-### Inheritance
+## Inheritance
 ```python
 class Student(Person):
     def __init__(self, name='', age=1, studentId=None):
@@ -323,7 +327,7 @@ student = Student('Prime', 10, 1)
 baby = person + student
 ```
 
-### Aditional Class Methods
+## Aditional Class Methods
 `id(obj)`: unique id of object
 
 `getattr(obj, attr: str)`: returns obj.attr, error if attr does not exist\
@@ -331,7 +335,7 @@ baby = person + student
 
 `setattr(obj, attr: str, value)`
 
-### Type vs Instance
+## Type vs Instance
 `isinstance()` supports inheritance, `type()` does not
 
 ```python
@@ -339,5 +343,5 @@ type(student) == Person     # False
 isinstance(student, Person) # True
 ```
 
-## Multithreading
+# Multithreading
 Global interpreter lock (GIL)

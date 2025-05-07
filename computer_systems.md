@@ -1,3 +1,48 @@
+# Operating System
+
+## Stack vs Heap
+Stack: region of memory that stores temporary variables
+- LIFO structure
+- Fast access
+- Managed automatically
+- Fixed size
+
+Heap: region of memory used for dynamic memory allocation
+- user/program manually allocates/frees memory (or language's runtime/garbage collector does it for you)
+- slower access
+- Managed explicitly (not by OS)
+- Larger than stack, can grow
+
+## Process vs Thread
+Process: a program in execution
+- Each process has a separate memory space
+    - Processes can communicate with each other via inter-process communication
+- OS must perform full context switch when switching between processes
+- Processes are managed by the process control block (PCB)
+    - Created and updated by the OS for each process
+
+
+Threads: smallest unit of execution in a process
+- Multiple threads can exist in a single process, with shared memory space
+
+## Concurrency
+
+## Memory
+
+## Cache
+
+## Virtual vs Physical Memory
+
+## Scheduler
+
+## File System
+
+## I/O
+
+## RAID
+
+## Virtualization & Containers
+
 # Compilers
 
 ## Preprocessor
@@ -22,7 +67,7 @@ In C/C++, files in <> will be searched in the standard compiler include paths, w
     - Seperators ((), {}, ;)
     - Comments
     - Whitespace
-    
+
 **Output:** stream of tokens
 
 ## Syntax Analysis (Parsing)
@@ -34,7 +79,7 @@ In C/C++, files in <> will be searched in the standard compiler include paths, w
         - Incorrect expression structure (eg. "x 3" has a missing operator)
         - etc...
 - Compress parse tree into syntax tree
-    
+
 **Output:** syntax tree
 
 ## Semantic Analysis
@@ -58,38 +103,6 @@ In C/C++, files in <> will be searched in the standard compiler include paths, w
 **Input:** intermediate representation
 
 **Output:** target machine code or assembly
-
-# Operating System
-
-## Process vs Thread
-Process - a program in execution
-- Each process has a separate memory space
-    - Processes can communicate with each other via inter-process communication
-- OS must perform full context switch when switching between processes
-- Processes are managed by the process control block (PCB)
-    - Created and updated by the OS for each process
-
-
-Threads - smallest unit of execution in a process
-- Multiple threads can exist in a single process, with shared memory space
-
-## Concurrency
-
-## Memory
-
-## Cache
-
-## Virtual vs Physical Memory
-
-## Scheduler
-
-## File System
-
-## I/O
-
-## RAID
-
-## Virtualization & Containers
 
 # Security
 

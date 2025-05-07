@@ -1,6 +1,7 @@
-# Data Structures & Algorithms
+Data Structures & Algorithms
+============================
 
-## Math
+# Math
 
 **Triangle number**: 1, 3, 6, 10, 15, 21, ...\
 n-th triangle number is given by `n * (n + 1) / 2`
@@ -9,7 +10,7 @@ n-th triangle number is given by `n * (n + 1) / 2`
 
 **Permutation (nPr)**: `n! / [(n - r)!]`
 
-## Arrays & Tuples
+# Arrays & Tuples
 `slicing [ start : stop : step ]`\
 `index(x[, start[, end]])`, raises error if x not found
 ```
@@ -18,7 +19,7 @@ n-th triangle number is given by `n * (n + 1) / 2`
 # tuples: (), tuple()
 ```
 
-### Sorting Algorithms
+## Sorting Algorithms
 <details>
 <summary>Bubble Sort</summary>
 
@@ -100,7 +101,7 @@ def merge_sort(nums):
 </details>
 <details>
 <summary>Quick Sort</summary>
-    Time complexity: average = best = O(nlogn), worst = O(n^2) when pivot is small or large
+Time complexity: average = best = O(nlogn), worst = O(n^2) when pivot is small or large
 
 ```python
 def partition(nums, l, r, pivot):
@@ -128,7 +129,8 @@ def quicksort(nums, l, r):
 ```
 </details>
 
-### Prefix Sum
+## Prefix Sum
+Number of subarrays with sum equal to x
 ```python
 x: int = ...
 num_subarrays = 0
@@ -141,6 +143,8 @@ for num in nums:
     prefix[curr] = prefix.get(curr, 0) + 1
 return num_subarrays
 ```
+
+Minimum number of removals to make array sum equal to x
 ```python
 x: int = ...
 total = sum(nums)
@@ -152,23 +156,22 @@ for i, num in enumerate(nums):
     curr += num
     if curr - target in prefix:
         longest_subarry = max(longest_subarry, i - prefix[curr - target])
-    prefix[curr] = i
+    if curr not in prefix:
+        prefix[curr] = i
 min_removals = len(nums) - longest_subarray
 return min_removals
 ```
 
-### Sliding Window
+## Sliding Window
 ```python
-l, r = 0, 0
-while r < len(arr):
-    ...
+l = 0
+for r in range(len(arr)):
     # update pointers
     while cond:
         l += 1
-    r += 1
 ```
 
-### Two Pointers
+## Two Pointers
 ```python
 l, r = 0, len(arr) - 1
 while l <= r:
@@ -180,7 +183,7 @@ while l <= r:
         r -= 1
 ```
 
-### Binary Search
+## Binary Search
 ```python
 sorted_arr = ...
 target = ...
@@ -195,7 +198,7 @@ def binary_search(sorted_arr, target):
     return -1 # target not found
 ```
 
-#### General binary search problem
+**General binary search problem**
 Search space = [0, N]\
 Objective: minimize/maximize k in search space s.t. condition(k) == True
 ```python
@@ -216,7 +219,7 @@ def minimize(arr):
     return l # or return l - 1 depending on problem
 ```
 
-## Linked List
+# Linked List
 ```python
 class ListNode:
     def __init__(self, val=0, next=None):
@@ -237,7 +240,7 @@ while fast and fast.next:
     ...
 ```
 
-### Floyd's Cycle Detection
+## Floyd's Cycle Detection
 Proof:
 - `x` = distance from head to cycle starting point
 - `y` = distance from cycle starting point to first meeting point of both pointers
@@ -270,20 +273,20 @@ while slow != fast:
 # slow is at cycle starting point
 ```
 
-## Stacks
+# Stacks
 ```python
 # use lists as stacks
 stack = []
 ```
 
-## Queues
+# Queues
 ```python
 from collections import deque
 
 queue = deque()
 ```
 
-## Heap
+# Heap
 ```python
 from heapq import heapify, heappop, heappush
 
@@ -296,7 +299,7 @@ maxHeap = [-x for x in maxHeap]
 heapify(maxHeap)
 ```
 
-## Set
+# Set
 ```python
 # {}, set()
 ```
@@ -308,7 +311,7 @@ heapify(maxHeap)
 | set1.union(set2) | set1 \| set2 |
 | set1.issubset(set2) | set1 <= set2 |
 
-## Dict
+# Dict
 ```python
 # {}, dict()
 ```
@@ -322,9 +325,9 @@ Returns view object, not list or iterator
 - dict1.values()
 - dict1.items()
 
-## Graph
+# Graph
 
-### Depth First Search
+## Depth First Search
 ```python
 def dfs(node, visited):
     visited[node] = True
@@ -339,22 +342,22 @@ Cycle detection using dfs
 def isCyclic(node, visited, curr_path):
     if visited[node]:
         return False
-    
+
     if curr_path[node]:
         return True
-    
+
     curr_path[node] = True
 
     for neighbor in node.neighbors:
         if isCyclic(neighbor, visited, curr_path):
             return True
-            
+
     visited[node] = True
     curr_path[node] = False
     return False
 ```
 
-### Breadth First Search
+## Breadth First Search
 ```python
 def bfs(node):
     queue = deque([node])
@@ -368,8 +371,9 @@ def bfs(node):
                 queue.append(neighbor)
 ```
 
-### Topological Sort
+## Topological Sort
 ```python
+# Kahn's algo
 def topological_sort(graph):
     in_deg = {node: 0 for node in graph}
 
@@ -395,11 +399,11 @@ def topological_sort(graph):
     return topo_order
 ```
 
-### Connected Components
+## Connected Components
 Weakly connected components - all vertices are connected by some path, ignoring direction of edges\
 Strongly connected component - every pair of vertices is mutually reachable
 
-#### Kosaraju's
+### Kosaraju's
 1. Run dfs, push node onto stack once it's finished
 2. Reverse the direction of all edges in the graph
 3. Run dfs in order of the nodes on stack, giving us one SCC
@@ -432,7 +436,7 @@ def dfs_reversed(node, visited, scc_map, scc):
     for neighbor in node.nieghbors:
         if visited[neighbor]:
             dfs_reversed(neighbor, visited)
-        
+
 while stack:
     node = stack.pop()
     if visited[node]:
@@ -440,7 +444,7 @@ while stack:
         scc += 1
 ```
 
-#### Disjoint Set (Union Find)
+### Disjoint Set (Union Find)
 1. Mark each node's parent as itself (each node is in its own set)
 2. If two nodes are merged, update one of the nodes' parent to the other
 ```python
@@ -453,7 +457,7 @@ rank = [0] * n
 def find(x):
     if parent[x] == x:
         return x
-    
+
     # path compression
     p = find(parent[x])
 
@@ -476,9 +480,9 @@ def union(x, y):
         rank[y_parent] += 1
 ```
 
-### Shortest Path
+## Shortest Path
 
-#### Dijkstra's
+### Dijkstra's
 - Shortest path from source vertex
 - Time copmlexity
     - O((|V| + |E|) * logV) with priority queue
@@ -486,7 +490,7 @@ def union(x, y):
 ```Python
 def dijkstra(graph, src):
     dist = [float('inf')] * n
-    
+
     visited = ...
     queue = [(0, src)]
     while queue:
@@ -504,7 +508,7 @@ def dijkstra(graph, src):
     return dist
 ```
 
-#### Bellman-Ford
+### Bellman-Ford
 - Shortest path from source vertex
 - Can handle negative weights and detect negative cycles
 - Time complexity O(|V| * |E|)
@@ -519,23 +523,23 @@ def bellman_ford(graph, src):
                 if dist[node] + weight < dist[neighbor]:
                     dist[neighbor] = dist[node] + weight
 
-    # check negative cycle 
+    # check negative cycle
     for node in graph:
         for neighbor, weight in node.neighbors:
             if dist[node] + weight < dist[neighbor]:
                 # shortest path can be improved -> contains negative cycle
                 ...
-            
+
     return dist
 ```
 
-#### Floyd-Warshall
+### Floyd-Warshall
 - Shortest path between all pairs of vertices
 ```python
 
 ```
 
-### Minimum Spanning Tree
+## Minimum Spanning Tree
 
 ### Kruskal's
 - Keep adding the shortest edge to collection of components
@@ -560,7 +564,7 @@ def kruskal(graph):
     mst = set()
 ```
 
-#### Prim's
+### Prim's
 - Add shortest edge to subgraph that doesn't create a cycle
 - Time complexity O((|V| + |E|) * logV)
 
@@ -590,7 +594,7 @@ def prim(graph):
     return mst, mst_cost if sum(visited) == n else set(), -1
 ```
 
-## Trees
+# Trees
 ```python
 # binary tree
 class TreeNode:
@@ -628,14 +632,14 @@ def postorder(root):
     return postorder(root.left) + postorder(root.right) + [root.val]
 ```
 
-### Binary Search Tree
+## Binary Search Tree
 Binary tree has the following propertes:
 - Node N's left child and its descendants have value lower N's value
 - Node N's right child and its descendants have value higher than N's value
 
 Inorder traversal will result in visiting the nodes by their value in increasing order
 
-#### BST Search
+### BST Search
 ```python
 def search(node, value):
     if not node:
@@ -649,7 +653,7 @@ def search(node, value):
 ```
 Time complexity: O(h)
 
-#### BST Insert
+### BST Insert
 ```python
 def insert(node, value):
     if not node:
@@ -662,7 +666,7 @@ def insert(node, value):
 ```
 Time complexity: O(h)
 
-#### BST Remove
+### BST Remove
 - Case 1: remove leaf node
 - Case 2: remove node with 1 child -> copy child node and delete child
 - Case 2: remove node with 2 children -> copy inorder successor and delete inorder successor
@@ -671,7 +675,7 @@ def remove(node, value):
     ...
 ```
 
-#### BST Balance
+### BST Balance
 - Do inorder traversal, make root node the middle item, recurse for left and right
 - Balancing BST will reduce height, optimizing search/insert/remove
 ```python
@@ -684,12 +688,12 @@ def balance(node):
                         create_subtree(arr, l, mid - 1),
                         create_subtree(arr, mid + 1, r))
         return root
-    
+
     arr = inorder(node)
     return create_subtree(arr, 0, len(arr) - 1)
 ```
 
-### AVL Tree
+## AVL Tree
 Self-balancing BST where the height of left and right subtrees of any node cannot exceed 1
 ```
 # search: similar to BST
@@ -699,24 +703,24 @@ Self-balancing BST where the height of left and right subtrees of any node canno
 # remove
 ```
 
-### Red Black Tree
+## Red Black Tree
 Provides faster insert/remove than avl, but slower lookup
 ```
 
 ```
 
-### B-Tree
+## B-Tree
 ```
 
 ```
 
 
-### Segment Tree
+## Segment Tree
 ```
 
 ```
 
-## Trie
+# Trie
 ```python
 class Trie:
     def __init__(self):
@@ -739,9 +743,9 @@ class Trie:
         return curr.get('end')
 ```
 
-## Dynamic Programming
+# Dynamic Programming
 
-### Backtrack
+## Backtrack
 ```python
 def backtrack(state):
     if is_solution(state):
@@ -754,7 +758,7 @@ def backtrack(state):
         undo_choice(state, choice)
 ```
 
-### Top Down
+## Top Down
 ```python
 # dfs but equivalent subtrees are memoized
 memo = {}
@@ -766,7 +770,7 @@ def fib(n):
     return memo[n]
 ```
 
-### Bottom Up
+## Bottom Up
 Fibonnaci
 ```python
 def fib(n):
