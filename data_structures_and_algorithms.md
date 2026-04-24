@@ -219,6 +219,10 @@ def minimize(arr):
     return l # or return l - 1 depending on problem
 ```
 
+## Kadane's Algorithm
+
+## Cyclic Sort
+
 # Linked List
 ```python
 class ListNode:
@@ -544,9 +548,9 @@ def bellman_ford(graph, src):
 ### Kruskal's
 - Keep adding the shortest edge to collection of components
 - Time complexity
-    - O(|E| * log|E|)
-    - |E| <= |V|^2
-    - O(|E| * log|V|^2) = O(E * log|V|)
+    - O(E * logE)
+    - E <= V^2
+    - O(E * logV^2) = O(E * logV)
 
 ![](https://i.sstatic.net/6RCFr.gif)
 ```python
@@ -566,7 +570,14 @@ def kruskal(graph):
 
 ### Prim's
 - Add shortest edge to subgraph that doesn't create a cycle
-- Time complexity O((|V| + |E|) * logV)
+- Common implementations
+    1. Adjacency matrix + simple min search
+        - Time complexity: O(V^2)
+    2. Adjacency list + min heap
+        - Time complexity O(E * logV)
+    3. Ficonacci heap
+        - Time complexity O(E + VlogV)
+        - Theoretically better, rarely used in practice
 
 ![](https://i.sstatic.net/KofyW.gif)
 ```python
