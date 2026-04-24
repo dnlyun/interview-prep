@@ -52,7 +52,7 @@ C++
 `!`: not operator
 
 `&`: address of variable\
-`*`: dereference pointer
+`*`: dereference pointer\
 `->`: access member of object pointed to by a pointer
 
 `? :`: conditional expression
