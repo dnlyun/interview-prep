@@ -24,6 +24,16 @@ An object is evaluated to `True` unless its class defines `__bool__()` that retu
 
 Chained comparisons short-circuit: `1 < x < 10` is `1 < x and x < 10`.
 
+## Integers
+
+`bool` is a subclass of `int` — `True + True == 2`, `isinstance(True, int)` is `True`.
+
+`int` has arbitrary precision — never overflows; no `long` type. Modular arithmetic from C-style overflow doesn't apply.
+
+Integer caching: `is` returns `True` for small ints (-5 to 256) but is unreliable. Use `==` for value comparison; reserve `is` for `None` / `True` / `False`.
+
+Floor division semantics: `-7 // 2 == -4` (floors toward `-∞`), not `-3` (truncation). `-7 % 2 == 1` (sign follows divisor). Differs from C/C++/Java. Use `int(a / b)` for truncation, or `divmod(a, b)` for `(quotient, remainder)`.
+
 ## Bit Manipulation
 
 | Operation           | Symbol   |
@@ -35,15 +45,11 @@ Chained comparisons short-circuit: `1 < x < 10` is `1 < x and x < 10`.
 | Bitwise left shift  | `a << b` |
 | Bitwise right shift | `a >> b` |
 
-## Integers
+## Binary
 
-`bool` is a subclass of `int` — `True + True == 2`, `isinstance(True, int)` is `True`.
-
-`int` has arbitrary precision — never overflows; no `long` type. Modular arithmetic from C-style overflow doesn't apply.
-
-Integer caching: `is` returns `True` for small ints (-5 to 256) but is unreliable. Use `==` for value comparison; reserve `is` for `None` / `True` / `False`.
-
-Floor division semantics: `-7 // 2 == -4` (floors toward `-∞`), not `-3` (truncation). `-7 % 2 == 1` (sign follows divisor). Differs from C/C++/Java. Use `int(a / b)` for truncation, or `divmod(a, b)` for `(quotient, remainder)`.
+Conversion:
+- `bin(x)`: convert int to binary string prefixed with `'0b'`
+- `int(x, 2)`: convert binary string to int
 
 ## Float, Complex
 
@@ -59,12 +65,6 @@ Complex: `z = 1 + 2j`
 Float comparison: `0.1 + 0.2 != 0.3`. Use `math.isclose(a, b)`.
 
 Sentinels: `float('inf')` / `-float('inf')` (or `math.inf`) for min/max init.
-
-## Binary
-
-Conversion:
-- `bin(x)`: convert int to binary string prefixed with `'0b'`
-- `int(x, 2)`: convert binary string to int
 
 ## Strings
 
@@ -91,6 +91,19 @@ Check if string is alphanumeric:
 
 String concatenation in a loop is O(n²) — strings are immutable. Use `''.join(parts)` or accumulate in a list.
 
+## F-string
+
+`f'{a = }, {b = }, {c = }'` prints each name and its value (e.g. `a = 1, b = 2, c = 3`).\
+`f'{a + b = }'` evaluates the expression and prints `a + b = 3`.
+
+| Format              | Syntax       | Result (`num = 10`) |
+| ------------------- | ------------ | ------------------- |
+| 2 decimal places    | `{num:.2f}`  | `10.00`             |
+| Hex                 | `{num:#x}`   | `0xa`               |
+| Binary              | `{num:b}`    | `1010`              |
+| Scientific notation | `{num:e}`    | `1.0e+1`            |
+| 5 digits            | `{num:05}`   | `00010`             |
+
 ## Lists
 
 Aliased rows in 2D init:
@@ -107,19 +120,6 @@ b = list(a)             # shallow copy
 import copy
 b = copy.deepcopy(a)    # deep copy (needed for nested lists)
 ```
-
-## F-string
-
-`f'{a = }, {b = }, {c = }'` prints each name and its value (e.g. `a = 1, b = 2, c = 3`).\
-`f'{a + b = }'` evaluates the expression and prints `a + b = 3`.
-
-| Format              | Syntax       | Result (`num = 10`) |
-| ------------------- | ------------ | ------------------- |
-| 2 decimal places    | `{num:.2f}`  | `10.00`             |
-| Hex                 | `{num:#x}`   | `0xa`               |
-| Binary              | `{num:b}`    | `1010`              |
-| Scientific notation | `{num:e}`    | `1.0e+1`            |
-| 5 digits            | `{num:05}`   | `00010`             |
 
 ## Print & I/O
 
@@ -209,6 +209,18 @@ def add(*nums):
 print(add(1, 1, 1, 1, 1))
 ```
 
+## Mutable Default Arguments
+
+Defaults are evaluated once at definition time.
+```python
+def f(acc=[]):              # BUG: list shared across calls
+    acc.append(1)
+    return acc
+
+def f(acc=None):            # correct
+    acc = [] if acc is None else acc
+```
+
 ## Lambda Functions
 
 - Anonymous: don't require a name
@@ -234,28 +246,6 @@ from functools import reduce
 list(map(lambda x: x * 2, [1, 2, 3]))       # [2, 4, 6]
 list(filter(lambda x: x > 1, [1, 2, 3]))    # [2, 3]
 reduce(lambda a, b: a + b, [1, 2, 3], 0)    # 6
-```
-
-## Mutable Default Arguments
-
-Defaults are evaluated once at definition time.
-```python
-def f(acc=[]):              # BUG: list shared across calls
-    acc.append(1)
-    return acc
-
-def f(acc=None):            # correct
-    acc = [] if acc is None else acc
-```
-
-## Walrus `:=`
-
-Assign inside expressions:
-```python
-while (line := f.readline()):
-    ...
-if (n := len(a)) > 10:
-    ...
 ```
 
 ## Variable Scope
@@ -299,14 +289,14 @@ def outer():
     print(x)    # 9
 ```
 
-## Main Function
+## Walrus `:=`
 
+Assign inside expressions:
 ```python
-def main():
+while (line := f.readline()):
     ...
-
-if __name__ == "__main__":
-    main()
+if (n := len(a)) > 10:
+    ...
 ```
 
 ## Functions are Objects
@@ -367,6 +357,16 @@ def outer(func):
 @outer
 def foo():
     ...
+```
+
+## Main Function
+
+```python
+def main():
+    ...
+
+if __name__ == "__main__":
+    main()
 ```
 
 # Class
