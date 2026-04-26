@@ -251,22 +251,6 @@ for (const auto& [key, value] : umap) {
 }
 ```
 
-## Dynamic Allocation
-
-`new`: allocates memory on the heap and returns a pointer to it\
-`delete` / `delete[]`: deallocates heap memory and calls the object's destructor
-
-```cpp
-int* p = new int(5);
-delete p;
-p = nullptr; // good practice: avoid dangling pointer
-
-int* arr = new int[10];
-delete[] arr;
-```
-
-Note: prefer smart pointers over raw `new`/`delete` to avoid memory leaks.
-
 ## Scope
 
 Local variables are uninitialized when declared; global variables are zero-initialized.
@@ -488,6 +472,22 @@ int* ptr2 = nums;
 int diff = ptr - ptr2; // 3 (number of elements between them)
 ```
 
+## Dynamic Allocation
+
+`new`: allocates memory on the heap and returns a pointer to it\
+`delete` / `delete[]`: deallocates heap memory and calls the object's destructor
+
+```cpp
+int* p = new int(5);
+delete p;
+p = nullptr; // good practice: avoid dangling pointer
+
+int* arr = new int[10];
+delete[] arr;
+```
+
+Note: prefer smart pointers over raw `new`/`delete` to avoid memory leaks.
+
 ## Smart Pointers (`<memory>`)
 
 Prefer smart pointers over raw `new`/`delete`.
@@ -573,100 +573,6 @@ v.reserve(100);               // pre-allocate capacity
 v.resize(10);                 // resize (fills new elements with 0)
 v.insert(v.begin() + 1, 99); // insert at position
 v.erase(v.begin());           // erase first element
-```
-
-# Value Categories
-
-`lvalue`: expression identifying a persistent object in memory (can appear on the left-hand side of an assignment)\
-`rvalue`: temporary value with no persistent memory location\
-`xvalue`: "eXpiring value" — an rvalue whose resources can be moved from
-
-![](https://i.sstatic.net/GNhBF.png)
-
-An lvalue can be implicitly converted to an rvalue:
-```cpp
-int x = 1;
-int y = x; // x used as rvalue here
-
-int arr[3];
-*(arr + 2) = 4; // (arr + 2) is an rvalue, but *(arr + 2) is an lvalue
-```
-
-Returning an lvalue reference:
-```cpp
-int global_var;
-
-int& get() {
-    return global_var;
-}
-get() = 4; // assigns 4 to global_var
-```
-
-Cannot bind an lvalue reference to an rvalue, but a `const` lvalue reference can:
-```cpp
-int& a = 10;        // Error
-const int& b = 10;  // OK: const lvalue reference extends the lifetime of the temporary
-```
-
-Function overloads by value category:
-```cpp
-void foo(std::string& str)       {} // lvalues only
-void foo(const std::string& str) {} // lvalues and rvalues
-void foo(std::string&& str)      {} // rvalues only
-```
-
-# Move Semantics
-
-Move semantics (C++11) allow transferring resources from a temporary object rather than copying, avoiding unnecessary allocations.
-
-## `std::move`
-
-Casts an lvalue to an rvalue reference, enabling a move instead of a copy.
-```cpp
-#include <utility>
-
-std::string a = "hello";
-std::string b = std::move(a); // a's content is moved into b; a is now in a valid but unspecified state
-```
-
-## Move Constructor and Move Assignment Operator
-
-```cpp
-class Buffer {
-    int* data;
-    size_t size;
-public:
-    // Move constructor
-    Buffer(Buffer&& other) noexcept
-        : data(other.data), size(other.size) {
-        other.data = nullptr;
-        other.size = 0;
-    }
-
-    // Move assignment operator
-    Buffer& operator=(Buffer&& other) noexcept {
-        if (this != &other) {
-            delete[] data;
-            data = other.data;
-            size = other.size;
-            other.data = nullptr;
-            other.size = 0;
-        }
-        return *this;
-    }
-};
-```
-
-## Perfect Forwarding
-
-`std::forward` preserves the value category of a forwarded argument. Used with forwarding references (`T&&`) in templates.
-```cpp
-#include <utility>
-
-template<typename T>
-void wrapper(T&& arg) {
-    target(std::forward<T>(arg)); // forwards as lvalue if T is lvalue ref, rvalue otherwise
-}
 ```
 
 # Functions
@@ -773,28 +679,98 @@ int invoke(int x, int y, std::function<int(int, int)> f) {
 }
 ```
 
-# Exception Handling
+# Value Categories
 
+`lvalue`: expression identifying a persistent object in memory (can appear on the left-hand side of an assignment)\
+`rvalue`: temporary value with no persistent memory location\
+`xvalue`: "eXpiring value" — an rvalue whose resources can be moved from
+
+![](https://i.sstatic.net/GNhBF.png)
+
+An lvalue can be implicitly converted to an rvalue:
 ```cpp
-#include <stdexcept>
+int x = 1;
+int y = x; // x used as rvalue here
 
-try {
-    if (error_condition)
-        throw std::runtime_error("something went wrong");
-} catch (const std::runtime_error& e) {
-    std::cerr << e.what();
-} catch (const std::exception& e) {
-    // catches any std::exception
-} catch (...) {
-    // catches everything
-}
+int arr[3];
+*(arr + 2) = 4; // (arr + 2) is an rvalue, but *(arr + 2) is an lvalue
 ```
 
-Common standard exceptions: `std::runtime_error`, `std::logic_error`, `std::out_of_range`, `std::invalid_argument`, `std::bad_alloc`.
-
-`noexcept`: promises a function will not throw, allowing compiler optimizations.
+Returning an lvalue reference:
 ```cpp
-void foo() noexcept {}
+int global_var;
+
+int& get() {
+    return global_var;
+}
+get() = 4; // assigns 4 to global_var
+```
+
+Cannot bind an lvalue reference to an rvalue, but a `const` lvalue reference can:
+```cpp
+int& a = 10;        // Error
+const int& b = 10;  // OK: const lvalue reference extends the lifetime of the temporary
+```
+
+Function overloads by value category:
+```cpp
+void foo(std::string& str)       {} // lvalues only
+void foo(const std::string& str) {} // lvalues and rvalues
+void foo(std::string&& str)      {} // rvalues only
+```
+
+# Move Semantics
+
+Move semantics (C++11) allow transferring resources from a temporary object rather than copying, avoiding unnecessary allocations.
+
+## `std::move`
+
+Casts an lvalue to an rvalue reference, enabling a move instead of a copy.
+```cpp
+#include <utility>
+
+std::string a = "hello";
+std::string b = std::move(a); // a's content is moved into b; a is now in a valid but unspecified state
+```
+
+## Move Constructor and Move Assignment Operator
+
+```cpp
+class Buffer {
+    int* data;
+    size_t size;
+public:
+    // Move constructor
+    Buffer(Buffer&& other) noexcept
+        : data(other.data), size(other.size) {
+        other.data = nullptr;
+        other.size = 0;
+    }
+
+    // Move assignment operator
+    Buffer& operator=(Buffer&& other) noexcept {
+        if (this != &other) {
+            delete[] data;
+            data = other.data;
+            size = other.size;
+            other.data = nullptr;
+            other.size = 0;
+        }
+        return *this;
+    }
+};
+```
+
+## Perfect Forwarding
+
+`std::forward` preserves the value category of a forwarded argument. Used with forwarding references (`T&&`) in templates.
+```cpp
+#include <utility>
+
+template<typename T>
+void wrapper(T&& arg) {
+    target(std::forward<T>(arg)); // forwards as lvalue if T is lvalue ref, rvalue otherwise
+}
 ```
 
 # Struct and Union
@@ -1135,6 +1111,57 @@ Base& ref = d;
 ref.speak();   // calls Dog::speak — no slicing
 ```
 
+# Exception Handling
+
+```cpp
+#include <stdexcept>
+
+try {
+    if (error_condition)
+        throw std::runtime_error("something went wrong");
+} catch (const std::runtime_error& e) {
+    std::cerr << e.what();
+} catch (const std::exception& e) {
+    // catches any std::exception
+} catch (...) {
+    // catches everything
+}
+```
+
+Common standard exceptions: `std::runtime_error`, `std::logic_error`, `std::out_of_range`, `std::invalid_argument`, `std::bad_alloc`.
+
+`noexcept`: promises a function will not throw, allowing compiler optimizations.
+```cpp
+void foo() noexcept {}
+```
+
+# Resource Acquisition Is Initialization (RAII)
+
+An object acquires a resource in its constructor and releases it in its destructor. This guarantees cleanup even when exceptions occur.
+
+```cpp
+class FileHandle {
+    FILE* file;
+public:
+    FileHandle(const char* name) {
+        file = fopen(name, "r");
+        if (!file) throw std::runtime_error("Cannot open file");
+    }
+    ~FileHandle() {
+        if (file) fclose(file);
+    }
+    FileHandle(const FileHandle&) = delete;
+    FileHandle& operator=(const FileHandle&) = delete;
+};
+
+void read_file() {
+    FileHandle fh("data.txt"); // resource acquired
+    // ... use fh ...
+} // fh destructor called here — file always closed, even if an exception occurs
+```
+
+Smart pointers (`unique_ptr`, `shared_ptr`) are the standard RAII wrappers for heap memory.
+
 # Templates
 
 Generic programming: write functions and classes that work with any type.
@@ -1218,33 +1245,6 @@ T square(T x) { return x * x; }
 template<std::integral T>
 T cube(T x) { return x * x * x; }
 ```
-
-# Resource Acquisition Is Initialization (RAII)
-
-An object acquires a resource in its constructor and releases it in its destructor. This guarantees cleanup even when exceptions occur.
-
-```cpp
-class FileHandle {
-    FILE* file;
-public:
-    FileHandle(const char* name) {
-        file = fopen(name, "r");
-        if (!file) throw std::runtime_error("Cannot open file");
-    }
-    ~FileHandle() {
-        if (file) fclose(file);
-    }
-    FileHandle(const FileHandle&) = delete;
-    FileHandle& operator=(const FileHandle&) = delete;
-};
-
-void read_file() {
-    FileHandle fh("data.txt"); // resource acquired
-    // ... use fh ...
-} // fh destructor called here — file always closed, even if an exception occurs
-```
-
-Smart pointers (`unique_ptr`, `shared_ptr`) are the standard RAII wrappers for heap memory.
 
 # Multithreading (`<thread>`)
 
