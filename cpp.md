@@ -60,6 +60,7 @@
 `? :`: ternary conditional expression
 
 `,`: comma operator — `result = (expr1, expr2, ..., exprN)` evaluates left-to-right, yields `exprN`
+- `for (int i = 0, j = 10; i < j; ++i, --j) { ... }`
 
 `::`: scope resolution operator
 
@@ -77,6 +78,48 @@
 | `long long`| 8 bytes  | -2⁶³ to 2⁶³ − 1                   |
 
 Use `<cstdint>` for fixed-width types: `int8_t`, `int32_t`, `uint64_t`, etc.
+
+## Endianness
+
+**Byte order** — the order in which bytes of a multi-byte value are stored in memory.
+
+- **Little-endian**: least significant byte stored at the lowest address (x86, ARM default)
+- **Big-endian**: most significant byte stored at the lowest address (network byte order, some RISC)
+
+Example: storing `0x01020304` at address `0x00`:
+
+| Address | Little-endian | Big-endian |
+| ------- | ------------- | ---------- |
+| `0x00`  | `04`          | `01`       |
+| `0x01`  | `03`          | `02`       |
+| `0x02`  | `02`          | `03`       |
+| `0x03`  | `01`          | `04`       |
+
+### Detecting endianness at runtime
+
+```cpp
+#include <cstdint>
+
+bool is_little_endian() {
+    uint32_t val = 1;  // 0x00000001
+    uint8_t* byte = reinterpret_cast<uint8_t*>(&val);
+    return *byte == 1;
+}
+```
+
+**Why this works**: The integer `1` is `0x00000001` — the least significant byte is `0x01` and the rest are `0x00`. By casting to a `uint8_t*`, we read just the first byte at the lowest address. On a little-endian system the least significant byte (`0x01`) is stored first, so `*byte == 1`. On a big-endian system the most significant byte (`0x00`) is stored first, so `*byte == 0`.
+
+### Using a char pointer
+
+```cpp
+bool is_little_endian() {
+    int val = 1;
+    char* byte = (char*)&val;
+    return *byte == 1;
+}
+```
+
+Same idea — `char*` is allowed to alias any type in C/C++, so casting `int*` to `char*` and reading the first byte is well-defined (unlike `reinterpret_cast` to most other types, which can be undefined behavior).
 
 ## Casting
 
@@ -112,8 +155,8 @@ char* p = reinterpret_cast<char*>(&x);
 #include <cstring>
 
 int main() {
-    char s1[10] = "Hello";
-    char s2[] = "World";
+    char s1[10] = "Hello";  // {'H', 'e', 'l', 'l', 'o', '\0', '\0', '\0', '\0', '\0'}
+    char s2[] = "World";    // {'W', 'o', 'r', 'l', 'd', '\0'}
 
     strcpy(s1, s2);   // copies s2 into s1 (s1 must be large enough)
     strcat(s1, s2);   // appends s2 to s1
@@ -631,7 +674,7 @@ void wrapper(T&& arg) {
 ## Declaration and Definition
 
 ```cpp
-int add(int a, int b); // forward declaration
+int add(int a, int b); // forward declaration (declare before defining)
 
 int add(int a = 0, int b = 0) { // definition with default parameters
     return a + b;
@@ -694,6 +737,7 @@ void print(int count, ...) {
 **Capture list:**
 - `[x]`: capture `x` by value
 - `[&x]`: capture `x` by reference
+- `[x, &y]`: capture `x` by value, `y` by reference
 - `[=]`: capture all reachable variables by value
 - `[&]`: capture all reachable variables by reference
 - `[=, &x]`: capture all by value, `x` by reference
@@ -766,15 +810,22 @@ In C++, the main difference between `class` and `struct` is the default access s
 
 ## Struct
 
-```cpp
-struct Point {
+In C, you must use the `struct` keyword when declaring variables: `struct Point p;`. A common workaround is `typedef`:
+```c
+typedef struct Point {
     int x, y;
-};
+} Point;
+
+Point p; // no struct prefix needed
+```
+
+In C++, the `struct` tag is automatically usable as a type name — no `typedef` needed. However, if a function shares the same name as a struct, the function hides the type and you must disambiguate with the `struct` keyword:
+```cpp
+struct Point { int x, y; };
+void Point() {} // function hides the struct name
 
 int main() {
-    Point p = {1, 2};   // aggregate initialization
-    Point p2;
-    p2.x = 3; p2.y = 4;
+    struct Point p = {1, 2}; // must use 'struct' prefix to refer to the type
     return 0;
 }
 ```
@@ -827,7 +878,7 @@ class Box {
         int length, width, height;
 
     public:
-        int get_volume(); // declared in class = implicitly inline
+        int get_volume(); // implicitly inline if defined in class declaration
 };
 
 // Define outside the class, not marked inline
@@ -893,6 +944,7 @@ Box& operator=(const Box& other) {
 ```cpp
 class Box {
 public:
+    // explicitly disable specific default functions
     Box(const Box&) = delete;
     Box& operator=(const Box&) = delete;
 };
@@ -907,6 +959,12 @@ class Box {
 public:
     ~Box() { std::cout << "Box destroyed\n"; }
 };
+
+int main() {
+    Box b;
+    b.~Box(); // explicit destructor call (rare)
+    return 0;
+}
 ```
 
 ### Rule of Three / Five / Zero
@@ -1030,6 +1088,11 @@ class GoldenRetriever : public Dog {};
 Objects of different types can be used through a common interface; behavior adapts based on the actual type at runtime.
 
 **Virtual functions and late binding:**
+
+`virtual` enables **dynamic dispatch** — the call is resolved at runtime based on the actual object type, not the pointer/reference type. Without `virtual`, the base class version is always called (static dispatch).
+
+`= 0` makes a virtual function **pure virtual**, meaning it has no implementation in the base class. Derived classes **must** override it. A class with at least one pure virtual function is **abstract** and cannot be instantiated.
+
 ```cpp
 class Shape {
 public:
@@ -1052,9 +1115,25 @@ int main() {
 ```
 
 - `override`: compile error if no matching virtual function exists in the base class
-- `final`: prevents a virtual function from being overridden further
+- `final`: prevents a virtual function from being overridden further, or prevents a class from being inherited. Also a performance hint — the compiler can devirtualize the call since no further overrides exist.
+```cpp
+class Circle : public Shape {
+    void draw() override final {} // no subclass can override draw
+};
+class Leaf final : public Shape { // no class can inherit from Leaf
+    void draw() override {}
+};
+```
 
-**Object slicing**: assigning a derived object to a base object by value discards the derived part. Use pointers or references to avoid this.
+**Object slicing**: assigning a derived object to a base object **by value** copies only the base portion — derived members and overridden behavior are lost. Use pointers or references to preserve polymorphism.
+```cpp
+Dog d;
+Base b = d;    // sliced: only Base part copied, Dog part gone
+b.speak();     // calls Base::speak
+
+Base& ref = d;
+ref.speak();   // calls Dog::speak — no slicing
+```
 
 # Templates
 
@@ -1091,13 +1170,16 @@ s.push(1);
 
 ## Template Specialization
 
-Provide a custom implementation for a specific type.
+Override the generic template with a custom implementation for a specific type — like function overloading but for templates. The compiler picks the specialization when the type matches, otherwise uses the generic version.
 ```cpp
 template<typename T>
-T zero() { return T(0); }
+T zero() { return T(0); } // generic: works for int, double, etc.
 
 template<>
-std::string zero<std::string>() { return ""; }
+std::string zero<std::string>() { return ""; } // std::string(0) doesn't make sense, so provide a special case
+
+zero<int>();         // uses generic → 0
+zero<std::string>(); // uses specialization → ""
 ```
 
 ## Non-type Template Parameters
@@ -1129,7 +1211,7 @@ Constrain template parameters:
 #include <concepts>
 
 template<typename T>
-requires std::integral<T>
+requires std::integral<T> // only accepts types that support integral operation
 T square(T x) { return x * x; }
 
 // Shorthand
