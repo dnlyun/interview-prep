@@ -22,6 +22,8 @@ An object is evaluated to `True` unless its class defines `__bool__()` that retu
 - `0`, `0.0`, `0j`
 - `''`, `()`, `[]`, `{}`, `set()`, `range(0)`
 
+Chained comparisons short-circuit: `1 < x < 10` is `1 < x and x < 10`.
+
 ## Bit Manipulation
 
 | Operation           | Symbol   |
@@ -33,6 +35,16 @@ An object is evaluated to `True` unless its class defines `__bool__()` that retu
 | Bitwise left shift  | `a << b` |
 | Bitwise right shift | `a >> b` |
 
+## Integers
+
+`bool` is a subclass of `int` — `True + True == 2`, `isinstance(True, int)` is `True`.
+
+`int` has arbitrary precision — never overflows; no `long` type. Modular arithmetic from C-style overflow doesn't apply.
+
+Integer caching: `is` returns `True` for small ints (-5 to 256) but is unreliable. Use `==` for value comparison; reserve `is` for `None` / `True` / `False`.
+
+Floor division semantics: `-7 // 2 == -4` (floors toward `-∞`), not `-3` (truncation). `-7 % 2 == 1` (sign follows divisor). Differs from C/C++/Java. Use `int(a / b)` for truncation, or `divmod(a, b)` for `(quotient, remainder)`.
+
 ## Float, Complex
 
 Constructors:
@@ -43,6 +55,10 @@ Scientific notation: `3e4`, `1.4e-2`
 
 Complex: `z = 1 + 2j`
 - `z.real` = `1.0`, `z.imag` = `2.0`
+
+Float comparison: `0.1 + 0.2 != 0.3`. Use `math.isclose(a, b)`.
+
+Sentinels: `float('inf')` / `-float('inf')` (or `math.inf`) for min/max init.
 
 ## Binary
 
@@ -72,6 +88,25 @@ Check if string is alphanumeric:
 `s.lower()`, `s.upper()`
 
 `s.split()`, `' '.join(list)`
+
+String concatenation in a loop is O(n²) — strings are immutable. Use `''.join(parts)` or accumulate in a list.
+
+## Lists
+
+Aliased rows in 2D init:
+```python
+grid = [[0] * n] * m                    # BUG: m references to the SAME row
+grid = [[0] * n for _ in range(m)]      # correct
+```
+
+Copy semantics:
+```python
+b = a                   # alias (same object)
+b = a[:]                # shallow copy
+b = list(a)             # shallow copy
+import copy
+b = copy.deepcopy(a)    # deep copy (needed for nested lists)
+```
 
 ## F-string
 
@@ -199,6 +234,28 @@ from functools import reduce
 list(map(lambda x: x * 2, [1, 2, 3]))       # [2, 4, 6]
 list(filter(lambda x: x > 1, [1, 2, 3]))    # [2, 3]
 reduce(lambda a, b: a + b, [1, 2, 3], 0)    # 6
+```
+
+## Mutable Default Arguments
+
+Defaults are evaluated once at definition time.
+```python
+def f(acc=[]):              # BUG: list shared across calls
+    acc.append(1)
+    return acc
+
+def f(acc=None):            # correct
+    acc = [] if acc is None else acc
+```
+
+## Walrus `:=`
+
+Assign inside expressions:
+```python
+while (line := f.readline()):
+    ...
+if (n := len(a)) > 10:
+    ...
 ```
 
 ## Variable Scope
@@ -387,3 +444,8 @@ isinstance(student, Person)     # True
 # Multithreading
 
 Global Interpreter Lock (GIL): in CPython, only one thread executes Python bytecode at a time. Threads are still useful for I/O-bound work; use `multiprocessing` for CPU-bound parallelism.
+
+Recent changes:
+- **3.12** (PEP 684): per-interpreter GIL — each subinterpreter gets its own GIL, enabling real parallelism via `concurrent.interpreters` (stdlib in 3.14)
+- **3.13** (PEP 703): experimental free-threaded build (`python3.13t`) that removes the GIL entirely — opt-in
+- **3.14**: free-threaded build officially supported (still optional). Default `python3.14` still has the GIL.
